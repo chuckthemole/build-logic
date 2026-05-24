@@ -1,0 +1,36 @@
+task printClasspath {
+    doLast {
+        def classpath = configurations.runtimeClasspath.asPath
+        println classpath
+    }
+}
+
+// TODO: look into this for building tools
+// can use command: gradle compileTool -PtoolFile=com/rumpus/rumpus/tools/Tool1.java
+// or no toolFile arg for compiling all tools
+// task compileTool(type: JavaCompile) {
+//     // Specify the default source directory
+//     source = fileTree('src/main/java/com/rumpus/rumpus/tools')
+
+//     // Use the property 'toolFile' if set, otherwise compile all Java files in the source directory
+//     if (project.hasProperty('toolFile')) {
+//         source = files("src/main/java/com/rumpus/rumpus/tools/${project.toolFile}")
+//     }
+
+//     classpath = files(
+//         "$buildDir/classes/java/main",
+//         project(':common').sourceSets.main.output,
+//         configurations.runtimeClasspath
+//     )
+//     destinationDir = file("$buildDir/tools/classes/java/main")
+
+//     // Optionally, you can print a message to confirm which file is being compiled
+//     doFirst {
+//         if (project.hasProperty('toolFile')) {
+//             println "Compiling ${project.toolFile}..."
+//         } else {
+//             println "Compiling all Java files..."
+//         }
+//     }
+// }
+

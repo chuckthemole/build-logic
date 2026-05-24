@@ -1,0 +1,16 @@
+dependencies {
+    implementation('org.springframework.boot:spring-boot-starter-jdbc:3.0.1')
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa:3.3.3')
+    implementation('mysql:mysql-connector-java:8.0.31')
+
+    // Spring Data
+    implementation('org.springframework.data:spring-data-bom:2022.0.1')
+    implementation('org.springframework.data:spring-data-commons')
+
+    // redis
+    implementation('org.springframework.data:spring-data-redis:3.2.0')
+    implementation('redis.clients:jedis:5.1.2')
+
+    // SQL
+    implementation 'org.jooq:jooq:3.15.1'
+}

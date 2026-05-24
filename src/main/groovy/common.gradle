@@ -1,0 +1,16 @@
+plugins {
+    id 'visual-studio'
+    id 'application'
+    id 'rumpus.java-conventions' // maybe library-conventions?
+    // TODO: I need to look more into plugins like this and see if we can organize these in a better way.
+    // Update: I want to get rid of this because admin module does not need it but is included because it's common
+    id 'common.aws'
+    id 'common.db'
+    id 'common.session'
+    id 'rumpus.dependencies'
+    id 'rumpus.tasks'
+    id 'rumpus.test'
+    id 'rumpus.test-conventions'
+
+    id 'maven-publish'
+}

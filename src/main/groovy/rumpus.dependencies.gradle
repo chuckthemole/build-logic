@@ -1,0 +1,84 @@
+// TODO: I should make these module specific. Rumpus doesn't need all the ones Common does, for example.
+dependencies {
+    implementation('org.springframework.boot:spring-boot-starter:3.0.1')
+    implementation('org.springframework.boot:spring-boot-starter-web:3.0.1') // Enables and configures Spring MVC
+    
+    // DB dependencies
+    // implementation('org.springframework.data:spring-data-bom:2022.0.0')
+    // implementation('org.springframework.boot:spring-boot-starter-jdbc:3.0.1')
+    // implementation('mysql:mysql-connector-java:8.0.31')
+    // testImplementation('com.h2database:h2:2.1.214')
+    // runtimeOnly('com.h2database:h2')
+
+    // implementation('org.springframework.data:spring-data-bom:2022.0.1')
+    // implementation('org.springframework.data:spring-data-commons')
+
+    // JPA this is bootstrapping spring data jpa and messing up the run. keeping here for later implementation - chuck 4/19/2024
+    // implementation('org.springframework.data:spring-data-jpa:3.2.3')
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // TODO: look into putting this in common
+
+    // implementation('org.springframework.session:spring-session-core:3.0.0')
+    // implementation('org.springframework.session:spring-session-jdbc:3.0.0')
+
+    implementation('org.reactivestreams:reactive-streams:1.0.4')
+    // implementation platform('io.projectreactor:reactor-bom:2022.0.3')
+    // implementation('io.projectreactor:reactor-core:3.5.3')
+    implementation('org.springframework.boot:spring-boot-starter-webflux:3.0.2')
+    implementation('org.springframework.boot:spring-boot-starter-security:3.0.2')
+    // implementation('org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.1.RELEASE')
+    implementation('org.springframework.boot:spring-boot-starter-websocket:3.0.2')
+
+    // Spring Boot Actuator and Spring Boot Admin
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
+    implementation('de.codecentric:spring-boot-admin-starter-client:3.2.1')
+    implementation('de.codecentric:spring-boot-admin-starter-server:3.2.1')
+
+    // Spring Boot dev tools
+    implementation('org.springframework.boot:spring-boot-devtools:3.0.1')
+
+    // Apache commons, using for some url validator stuff right now - chuck 4/30/2024
+    // implementation('org.apache.commons:commons-collections4:4.5.0-M1')
+    implementation('commons-validator:commons-validator:1.7')
+
+    // implementation('org.springframework.boot:spring-boot-starter-thymeleaf:3.0.1')
+    implementation('org.webjars:bootstrap:5.2.3')
+
+    // Gargoyle software web requests
+    implementation('net.sourceforge.htmlunit:htmlunit:2.70.0')
+
+    // Testing
+	// testImplementation('org.springframework.boot:spring-boot-starter-test')
+    // testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.1')
+    // testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.8.1')
+
+    // kong
+    implementation('com.konghq:unirest-java:3.11.13')
+
+    // JS
+    // implementation('com.github.eirslett:frontend-maven-plugin:1.12.1')
+
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+
+    // implementation("org.springframework.boot:spring-boot-starter-security")
+    // implementation('org.springframework.security:spring-security-test')
+
+    implementation('com.j2html:j2html:1.6.0')
+
+    // Python
+    implementation('org.python:jython-standalone:2.7.2')
+
+    // Cloud
+    // implementation('io.awspring.cloud:spring-cloud-aws:3.1.1')
+    // implementation('io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.1')
+
+    // Tesseract https://www.baeldung.com/java-ocr-tesseract
+    implementation('net.sourceforge.tess4j:tess4j:5.13.0')
+
+    implementation('org.springframework.boot:spring-boot-starter-oauth2-client')
+    implementation('org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.5.0') // This is only needed if you're also implementing a resource server that needs to validate JWT tokens from the OAuth2 provider.
+
+    implementation('io.jsonwebtoken:jjwt-api:0.12.6')
+    runtimeOnly('io.jsonwebtoken:jjwt-impl:0.12.6')
+    runtimeOnly('io.jsonwebtoken:jjwt-jackson:0.12.6') // for Jackson JSON parser
+
+}
