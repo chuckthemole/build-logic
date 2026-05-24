@@ -6,7 +6,6 @@ import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.create
-import org.gradle.api.provider.Provider
 import org.gradle.api.artifacts.MinimalExternalModuleDependency
 
 /**
