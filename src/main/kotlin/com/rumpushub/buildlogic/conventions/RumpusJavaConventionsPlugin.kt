@@ -15,11 +15,6 @@ class RumpusJavaConventionsPlugin : Plugin<Project> {
         // Apply Java library plugin
         project.plugins.apply("java-library")
 
-        // Configure repositories
-        project.repositories {
-            mavenCentral()
-        }
-
         // Configure Java compiler options
         project.tasks.withType<JavaCompile> {
             options.encoding = "UTF-8"

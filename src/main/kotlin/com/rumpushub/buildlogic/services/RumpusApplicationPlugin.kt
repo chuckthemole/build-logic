@@ -1,44 +1,48 @@
 package com.rumpushub.buildlogic.services
 
-import com.rumpushub.buildlogic.conventions.CommonPlugin
 import com.rumpushub.buildlogic.conventions.RumpusTestConventions
 import com.rumpushub.buildlogic.core.RumpusPlugin
-import com.rumpushub.buildlogic.dependencies.*
+import com.rumpushub.buildlogic.dependencies.AwsDependenciesPlugin
+import com.rumpushub.buildlogic.dependencies.CommonSessionDependencies
+import com.rumpushub.buildlogic.dependencies.OpenApiDependenciesPlugin
+import com.rumpushub.buildlogic.dependencies.RumpusDependenciesPlugin
 import com.rumpushub.buildlogic.testing.RumpusTest
 import com.rumpushub.buildlogic.utils.EnvLoader
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.springframework.boot.gradle.tasks.run.BootRun
 
 /**
- * AdminServicePlugin
+ * RumpusApplicationPlugin
  *
- * High-level composition plugin for the Admin service module.
+ * High-level composition plugin for the main Rumpus application.
  *
- * This plugin:
- * - Applies shared conventions and feature plugins
- * - Centralizes dependency composition for the Admin service
- * - Configures AWS / DB / Session / Testing dependencies
- * - Loads environment configuration (DEV / BETA / LIVE)
- * - Configures repositories dynamically
+ * Responsibilities:
+ * - Applies shared conventions/plugins
+ * - Configures dependency buckets
+ * - Configures repositories + environment loading
+ * - Configures BootRun JVM/runtime behavior
+ * - Handles DEV vs published common dependency resolution
  *
- * IMPORTANT:
- * This is a "composition layer" plugin only.
- * It should NOT contain business logic or module-specific code.
+ * This plugin is intentionally orchestration-only.
  */
-class AdminServicePlugin : Plugin<Project> {
+class RumpusApplicationPlugin : Plugin<Project> {
 
     // -------------------------------------------------------------------------
-    // Version Catalog Access (safe, explicit, build-logic compatible)
+    // Version catalog helpers
     // -------------------------------------------------------------------------
-    private fun Project.libs(): VersionCatalog = extensions
-        .getByType(VersionCatalogsExtension::class.java)
-        .named("rumpusLibs")
+    private fun Project.libs(): VersionCatalog =
+        extensions
+            .getByType(VersionCatalogsExtension::class.java)
+            .named("rumpusLibs")
 
     private fun VersionCatalog.lib(name: String) =
         findLibrary(name).orElseThrow {
-            IllegalArgumentException("Library alias '$name' not found in rumpusLibs catalog")
+            IllegalArgumentException(
+                "Library alias '$name' not found in rumpusLibs"
+            )
         }
 
     override fun apply(project: Project) {
@@ -46,76 +50,105 @@ class AdminServicePlugin : Plugin<Project> {
         val libs = project.libs()
 
         // ---------------------------------------------------------------------
-        // Core build conventions
+        // Core conventions
         // ---------------------------------------------------------------------
-        project.pluginManager.apply(CommonPlugin::class.java)
         project.pluginManager.apply(RumpusPlugin::class.java)
 
         // ---------------------------------------------------------------------
         // Feature plugins
         // ---------------------------------------------------------------------
         project.pluginManager.apply(AwsDependenciesPlugin::class.java)
-        project.pluginManager.apply(CommonDBDependenciesPlugin::class.java)
         project.pluginManager.apply(CommonSessionDependencies::class.java)
         project.pluginManager.apply(RumpusTest::class.java)
         project.pluginManager.apply(RumpusTestConventions::class.java)
+        project.pluginManager.apply(OpenApiDependenciesPlugin::class.java)
         project.pluginManager.apply(RumpusDependenciesPlugin::class.java)
 
         // ---------------------------------------------------------------------
         // AWS
         // ---------------------------------------------------------------------
-        project.extensions.configure(AwsDependenciesPlugin.AwsExtension::class.java) {
-            awsCoreDependency = libs.lib("springCloudAws").get()
-            awsS3Dependency = libs.lib("springCloudAwsS3").get()
-        }
+        project.extensions.configure(
+            AwsDependenciesPlugin.AwsExtension::class.java
+        ) {
+            awsCoreDependency =
+                libs.lib("springCloudAws").get()
 
-        // ---------------------------------------------------------------------
-        // DB
-        // ---------------------------------------------------------------------
-        project.extensions.configure(CommonDBDependenciesPlugin.DbExtension::class.java) {
-            springJdbc = libs.lib("springJdbc").get()
-            springDataJpa = libs.lib("springDataJpa").get()
-            mysqlConnector = libs.lib("mysql").get()
-            redis = libs.lib("springDataRedis").get()
-            jedis = libs.lib("jedis").get()
-            jooq = libs.lib("jooq").get()
+            awsS3Dependency =
+                libs.lib("springCloudAwsS3").get()
         }
 
         // ---------------------------------------------------------------------
         // Session
         // ---------------------------------------------------------------------
-        project.extensions.configure(CommonSessionDependencies.SessionExtension::class.java) {
+        project.extensions.configure(
+            CommonSessionDependencies.SessionExtension::class.java
+        ) {
             core.set(
                 libs.findLibrary("springSessionCore")
-                    .orElseThrow { IllegalArgumentException("Missing springSessionCore") }
+                    .orElseThrow {
+                        IllegalArgumentException(
+                            "Missing springSessionCore"
+                        )
+                    }
             )
 
             jdbc.set(
                 libs.findLibrary("springSessionJdbc")
-                    .orElseThrow { IllegalArgumentException("Missing springSessionJdbc") }
+                    .orElseThrow {
+                        IllegalArgumentException(
+                            "Missing springSessionJdbc"
+                        )
+                    }
             )
         }
 
         // ---------------------------------------------------------------------
         // Testing
         // ---------------------------------------------------------------------
-        project.extensions.configure(RumpusTest.TestExtension::class.java) {
-            springBoot = libs.lib("springBootStarterTest").get()
-            mockito = libs.lib("mockito").get()
-            junitApi = libs.lib("junit").get()
-            junitEngine = libs.lib("junitEngine").get()
-            springSecurityTest = libs.lib("springSecurityTest").get()
+        project.extensions.configure(
+            RumpusTest.TestExtension::class.java
+        ) {
+            springBoot =
+                libs.lib("springBootStarterTest").get()
+
+            mockito =
+                libs.lib("mockito").get()
+
+            junitApi =
+                libs.lib("junit").get()
+
+            junitEngine =
+                libs.lib("junitEngine").get()
+
+            springSecurityTest =
+                libs.lib("springSecurityTest").get()
         }
 
-        project.extensions.configure(RumpusTestConventions.TestConventionsExtension::class.java) {
-            junitVersion = libs.lib("junit4").get()
+        project.extensions.configure(
+            RumpusTestConventions.TestConventionsExtension::class.java
+        ) {
+            junitVersion =
+                libs.lib("junit4").get()
+
             showStandardStreams = true
+        }
+
+        // ---------------------------------------------------------------------
+        // OpenAPI
+        // ---------------------------------------------------------------------
+        project.extensions.configure(
+            OpenApiDependenciesPlugin.OpenApiExtension::class.java
+        ) {
+            springdocUi =
+                libs.lib("openApiUi").get()
         }
 
         // ---------------------------------------------------------------------
         // Aggregated dependency buckets
         // ---------------------------------------------------------------------
-        project.extensions.configure(RumpusDependenciesPlugin.RumpusDepsExtension::class.java) {
+        project.extensions.configure(
+            RumpusDependenciesPlugin.RumpusDepsExtension::class.java
+        ) {
 
             core.addAll(
                 listOf(
@@ -188,29 +221,87 @@ class AdminServicePlugin : Plugin<Project> {
         }
 
         // ---------------------------------------------------------------------
+        // Project metadata
+        // ---------------------------------------------------------------------
+        project.group =
+            libs.findVersion("rumpusGroup")
+                .get()
+                .requiredVersion
+
+        project.version =
+            libs.findVersion("rumpus")
+                .get()
+                .requiredVersion
+
+        // ---------------------------------------------------------------------
         // Environment
         // ---------------------------------------------------------------------
         EnvLoader.loadDotEnv(project)
 
-        val env = project.findProperty("ENV") as? String ?: "DEV"
-        project.logger.lifecycle("AdminServicePlugin using environment: $env")
+        val env =
+            project.findProperty("ENV") as? String ?: "DEV"
+
+        val heap =
+            project.findProperty("HEAP") as? String
+                ?: "LIMITED_HEAP"
+
+        project.logger.lifecycle(
+            "RumpusApplicationPlugin using environment: $env"
+        )
+
+        project.logger.lifecycle(
+            "RumpusApplicationPlugin using heap profile: $heap"
+        )
 
         // ---------------------------------------------------------------------
-        // Spring Boot (plugin IDs remain string-based)
+        // Spring Boot plugins
         // ---------------------------------------------------------------------
         project.pluginManager.apply("org.springframework.boot")
         project.pluginManager.apply("io.spring.dependency-management")
 
         // ---------------------------------------------------------------------
-        // Core dependency (DEV uses project, others use artifact)
+        // Common dependency handling
         // ---------------------------------------------------------------------
         project.dependencies.add(
             "implementation",
             if (env == "DEV") {
+
+                project.logger.lifecycle(
+                    "Using local :common dependency"
+                )
+
                 project.project(":common")
+
             } else {
-                "com.rumpushub.common:common:0.1.3"
+
+                project.logger.lifecycle(
+                    "Using published common artifact"
+                )
+
+                libs.lib("common").get()
             }
         )
+
+        // ---------------------------------------------------------------------
+        // BootRun configuration
+        // ---------------------------------------------------------------------
+        project.tasks.named(
+            "bootRun",
+            BootRun::class.java
+        ) {
+
+            systemProperty(
+                "env",
+                if (env == "DEV") "dev" else "live"
+            )
+
+            if (heap == "LIMITED_HEAP") {
+
+                jvmArgs(
+                    "-Xmx512m",
+                    "-Xms256m"
+                )
+            }
+        }
     }
 }

@@ -1,9 +1,6 @@
-import org.gradle.api.plugins.ExtensionContainer
-import org.gradle.api.artifacts.VersionCatalogsExtension
-
-import org.gradle.plugin.devel.GradlePluginDevelopmentExtension
-import org.gradle.plugin.devel.PluginDeclaration
 import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.plugin.devel.PluginDeclaration
 
 // --------------------------------------------------------------------------
 // buildSrc/build.gradle.kts
@@ -31,7 +28,7 @@ plugins {
 // Where to resolve plugin and library dependencies from.
 repositories {
   mavenCentral() // Standard Maven repository
-  gradlePluginPortal()  // Required for Gradle plugins
+  gradlePluginPortal() // Required for Gradle plugins
 }
 
 // Apply Formatting
@@ -41,17 +38,39 @@ repositories {
 // Dependencies
 // --------------------------------------------------------------------------
 // Core dependencies needed for plugin compilation and testing.
-val libs = extensions
-    .getByType<VersionCatalogsExtension>()
-    .named("rumpusLibs")
-val spotlessVersion = libs
-    .findVersion("spotless")
-    .get().requiredVersion
+val libs = extensions.getByType<VersionCatalogsExtension>().named("rumpusLibs")
+
+fun lib(alias: String) =
+    libs.findLibrary(alias).orElseThrow {
+      IllegalArgumentException("Missing library alias: $alias")
+    }
+
+val spotlessVersion = libs.findVersion("spotless").get().requiredVersion
+
 val spotlessPlugin = "com.diffplug.spotless:spotless-plugin-gradle:$spotlessVersion"
 
 dependencies {
+  // Kotlin DSL support
   implementation(kotlin("gradle-plugin"))
+
+  // Spotless plugin dependency
   implementation(spotlessPlugin)
+
+  // Catalog dependencies
+  implementation(lib("springBootWeb").get())
+  implementation(lib("junit").get())
+
+  // Spring Boot Gradle plugin
+  implementation(
+      "org.springframework.boot:spring-boot-gradle-plugin:${
+            libs.findVersion("springBoot").get().requiredVersion
+        }")
+
+  // Dependency management plugin
+  implementation(
+      "io.spring.gradle:dependency-management-plugin:${
+            libs.findVersion("dependencyManagement").get().requiredVersion
+        }")
 
   // Gradle API allows writing custom plugins
   // implementation(gradleApi())
@@ -73,84 +92,49 @@ fun NamedDomainObjectContainer<PluginDeclaration>.registerConventionPlugin(
     id: String,
     implementationClass: String
 ) {
-    register(name) {
-        this.id = id
-        this.implementationClass = implementationClass
-    }
+  register(name) {
+    this.id = id
+    this.implementationClass = implementationClass
+  }
 }
 
 gradlePlugin {
+  plugins {
 
-    plugins {
+    // -----------------------------------------------------------------
+    // Formatting
+    // -----------------------------------------------------------------
+    registerConventionPlugin(
+        name = "spotlessConvention",
+        id = "com.rumpushub.spotless",
+        implementationClass = "com.rumpushub.buildlogic.formatting.SpotlessPlugin")
 
-        // -----------------------------------------------------------------
-        // Formatting
-        // -----------------------------------------------------------------
-        registerConventionPlugin(
-            name = "spotlessConvention",
-            id = "com.rumpushub.spotless",
-            implementationClass =
-                "com.rumpushub.buildlogic.formatting.SpotlessPlugin"
-        )
+    // -----------------------------------------------------------------
+    // Publishing
+    // -----------------------------------------------------------------
+    registerConventionPlugin(
+        name = "publishingConventions",
+        id = "com.rumpushub.publishing",
+        implementationClass = "com.rumpushub.buildlogic.publishing.CommonPublisherPlugin")
 
-        // -----------------------------------------------------------------
-        // Dependency Bundles
-        // -----------------------------------------------------------------
-        registerConventionPlugin(
-            name = "sessionDependencies",
-            id = "com.rumpushub.session-dependencies",
-            implementationClass =
-                "com.rumpushub.buildlogic.dependencies.CommonSessionDependencies"
-        )
+    // -----------------------------------------------------------------
+    // Services
+    // -----------------------------------------------------------------
+    registerConventionPlugin(
+        name = "adminService",
+        id = "com.rumpushub.services.admin-service",
+        implementationClass = "com.rumpushub.buildlogic.services.AdminServicePlugin")
 
-        registerConventionPlugin(
-            name = "awsDependencies",
-            id = "com.rumpushub.aws-dependencies",
-            implementationClass =
-                "com.rumpushub.buildlogic.dependencies.AwsDependenciesPlugin"
-        )
+    registerConventionPlugin(
+        name = "commonLibrary",
+        id = "com.rumpushub.services.common-library",
+        implementationClass = "com.rumpushub.buildlogic.services.CommonLibraryPlugin")
 
-        registerConventionPlugin(
-            name = "dbDependencies",
-            id = "com.rumpushub.db-dependencies",
-            implementationClass =
-                "com.rumpushub.buildlogic.dependencies.CommonDBDependenciesPlugin"
-        )
-
-        // -----------------------------------------------------------------
-        // Conventions
-        // -----------------------------------------------------------------
-        registerConventionPlugin(
-            name = "javaConventions",
-            id = "com.rumpushub.java-conventions",
-            implementationClass =
-                "com.rumpushub.buildlogic.conventions.RumpusJavaConventionsPlugin"
-        )
-
-        registerConventionPlugin(
-            name = "testingConventions",
-            id = "com.rumpushub.testing-conventions",
-            implementationClass =
-                "com.rumpushub.buildlogic.testing.RumpusTestConventions"
-        )
-
-        // -----------------------------------------------------------------
-        // Publishing
-        // -----------------------------------------------------------------
-        registerConventionPlugin(
-            name = "publishingConventions",
-            id = "com.rumpushub.publishing",
-            implementationClass =
-                "com.rumpushub.buildlogic.publishing.CommonPublisherPlugin"
-        )
-        
-        registerConventionPlugin(
-            name = "adminService",
-            id = "com.rumpushub.services.admin-service",
-            implementationClass =
-                "com.rumpushub.buildlogic.services.AdminServicePlugin"
-        )
-    }
+    registerConventionPlugin(
+        name = "rumpusApplication",
+        id = "com.rumpushub.services.rumpus-application",
+        implementationClass = "com.rumpushub.buildlogic.services.RumpusApplicationPlugin")
+  }
 }
 
 // --------------------------------------------------------------------------
