@@ -254,12 +254,6 @@ class RumpusApplicationPlugin : Plugin<Project> {
         )
 
         // ---------------------------------------------------------------------
-        // Spring Boot plugins
-        // ---------------------------------------------------------------------
-        project.pluginManager.apply("org.springframework.boot")
-        project.pluginManager.apply("io.spring.dependency-management")
-
-        // ---------------------------------------------------------------------
         // Common dependency handling
         // ---------------------------------------------------------------------
         project.dependencies.add(

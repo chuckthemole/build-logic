@@ -196,12 +196,6 @@ class AdminServicePlugin : Plugin<Project> {
         project.logger.lifecycle("AdminServicePlugin using environment: $env")
 
         // ---------------------------------------------------------------------
-        // Spring Boot (plugin IDs remain string-based)
-        // ---------------------------------------------------------------------
-        project.pluginManager.apply("org.springframework.boot")
-        project.pluginManager.apply("io.spring.dependency-management")
-
-        // ---------------------------------------------------------------------
         // Core dependency (DEV uses project, others use artifact)
         // ---------------------------------------------------------------------
         project.dependencies.add(
@@ -209,7 +203,7 @@ class AdminServicePlugin : Plugin<Project> {
             if (env == "DEV") {
                 project.project(":common")
             } else {
-                "com.rumpushub.common:common:0.1.3"
+                "com.rumpushub.common:common:0.1.3" // TODO: remove hardcoded version!!!
             }
         )
     }

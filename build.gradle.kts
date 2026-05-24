@@ -134,6 +134,11 @@ gradlePlugin {
         name = "rumpusApplication",
         id = "com.rumpushub.services.rumpus-application",
         implementationClass = "com.rumpushub.buildlogic.services.RumpusApplicationPlugin")
+
+    registerConventionPlugin(
+        name = "springBootService",
+        id = "com.rumpushub.services.spring-boot",
+        implementationClass = "com.rumpushub.buildlogic.services.SpringBootServicePlugin")
   }
 }
 

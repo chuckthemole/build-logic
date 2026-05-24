@@ -248,12 +248,6 @@ class CommonLibraryPlugin : Plugin<Project> {
         }
 
         // ---------------------------------------------------------------------
-        // External plugins
-        // ---------------------------------------------------------------------
-        project.pluginManager.apply("org.springframework.boot")
-        project.pluginManager.apply("io.spring.dependency-management")
-
-        // ---------------------------------------------------------------------
         // Coordinates
         // ---------------------------------------------------------------------
         project.group =
